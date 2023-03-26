@@ -21,6 +21,7 @@ public class MessageProcessor implements Callable<MessageProcessor.Result> {
     }
 
     private final Socket clientSocket;
+    private final NumberAggregator numberAggregator;
 
     /**
      * Pattern to match and validate the client input is formatted with:
@@ -29,8 +30,9 @@ public class MessageProcessor implements Callable<MessageProcessor.Result> {
      */
     private final Pattern validationPattern = Pattern.compile("[0-9]{9}");
 
-    public MessageProcessor(Socket clientSocket) {
+    public MessageProcessor(Socket clientSocket, NumberAggregator numberAggregator) {
         this.clientSocket = clientSocket;
+        this.numberAggregator = numberAggregator;
     }
 
     private boolean validateNumber(String number) {
@@ -44,13 +46,13 @@ public class MessageProcessor implements Callable<MessageProcessor.Result> {
         ) {
             var inputLine = input.readLine();
             while (inputLine != null) {
-                System.out.println(inputLine);
-
                 if (inputLine.equals("terminate")) {
                     return Result.TERMINATE;
                 } else if (!validateNumber(inputLine)) {
                     return Result.BAD_REQUEST;
                 }
+
+                numberAggregator.acceptNumber(inputLine);
 
                 inputLine = input.readLine();
             }

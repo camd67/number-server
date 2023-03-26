@@ -24,8 +24,10 @@ public class App {
         new App().run();
     }
 
-    private final ListeningExecutorService socketProcessingPool;
-    private final ScheduledExecutorService reporterService;
+    private final ListeningExecutorService socketProcessingPool = MoreExecutors.listeningDecorator(
+        Executors.newFixedThreadPool(NUM_CONNECTIONS)
+    );
+    private final ScheduledExecutorService reporterService = Executors.newSingleThreadScheduledExecutor();
     private final NumberAggregator numberAggregator = new NumberAggregator();
 
     /**
@@ -35,11 +37,7 @@ public class App {
      */
     private volatile boolean terminationRequested;
 
-    public App() {
-        socketProcessingPool = MoreExecutors.listeningDecorator(
-            Executors.newFixedThreadPool(NUM_CONNECTIONS)
-        );
-        reporterService = Executors.newSingleThreadScheduledExecutor();
+    public App() throws IOException {
     }
 
     /**
@@ -50,9 +48,10 @@ public class App {
         startSocketListeners();
     }
 
-    private void shutdown() {
+    private void shutdown() throws IOException {
         // Close everything down.
         // Careful! Missing even a single service here results in a hung java process
+        numberAggregator.close();
         reporterService.shutdownNow();
         socketProcessingPool.shutdownNow();
     }
@@ -77,7 +76,7 @@ public class App {
         try (var server = new ServerSocket(PORT)) {
             while (true) {
                 var clientSocket = server.accept();
-                var future = socketProcessingPool.submit(new MessageProcessor(clientSocket));
+                var future = socketProcessingPool.submit(new MessageProcessor(clientSocket, numberAggregator));
                 // Connect up callbacks for when the message processor finishes
                 // This way we can notice when a client requests for termination
                 // of the server.

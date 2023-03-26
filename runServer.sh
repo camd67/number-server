@@ -12,7 +12,7 @@ if ! [[ $(command -v java) ]]; then
   exit 1
 fi
 
-if [[ -z $SKIP_COMPILE ]]; then
+if [[ -z ${SKIP_COMPILE:-} ]]; then
   mvn package -DskipTests -Pserver
   echo
   echo
