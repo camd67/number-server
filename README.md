@@ -14,6 +14,8 @@ Server can be started via `./runServer.sh`
 
 Clients can be started via `./runClient.sh`
 - `user` param runs the client with "user" input. That is it expects inputs to come in via stdin.
+- `infinite` param runs the client and generates infinite random numbers to feed to the server
+- `count <x>` increments upwards starting at `x`
 
 All building is done via maven and is auto-compiled on every run. If you'd prefer not to do this set the environment
 variable `SKIP_COMPILE` to any non-blank value.
@@ -29,3 +31,9 @@ TBD
     have an available permit.
 - It's okay the client is not the most robust. It functions but there are a fair number of improvements around error
   handling.
+- We have at least 5gb of free memory to work with (in the worst case).
+  - If we don't have that available for whatever reason, there are ways we can offload the duplicate detection
+  - This also means we are running on a 64bit machine
+
+### Performance Results
+Running on a Intel i7-9700K with 16gb ram results in a peak of around 23 million numbers per 10 second reporting period

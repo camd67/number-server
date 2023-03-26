@@ -19,6 +19,10 @@ public class Client {
     public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length > 0 && args[0].equals("user")) {
             new Client().runAsUser();
+        } else if (args.length > 0 && args[0].equals("infinite")) {
+            new Client().runInfinite();
+        } else if (args.length > 0 && args[0].equals("count")) {
+            new Client().runUp(args[1]);
         } else {
             new Client().run();
         }
@@ -56,8 +60,8 @@ public class Client {
 
     private void run() throws IOException, InterruptedException {
         try (
-                var socket = new Socket("localhost", App.PORT);
-                var output = new PrintWriter(socket.getOutputStream(), true);
+            var socket = new Socket("localhost", App.PORT);
+            var output = new PrintWriter(socket.getOutputStream(), true);
         ) {
             for (var i = 0; i < messages.size(); i++) {
                 output.println(messages.get(i));
@@ -71,12 +75,40 @@ public class Client {
         }
     }
 
+    private void runUp(String startInput) throws IOException {
+        var current = Integer.parseInt(startInput);
+        try (
+            var socket = new Socket("localhost", App.PORT);
+            var output = new PrintWriter(socket.getOutputStream(), true);
+        ) {
+            while (true) {
+                if (current > 1_000_000_000) {
+                    System.out.println("Reached max value");
+                    return;
+                }
+                output.println(String.format("%09d", current));
+                current++;
+            }
+        }
+    }
+
+    private void runInfinite() throws IOException {
+        try (
+            var socket = new Socket("localhost", App.PORT);
+            var output = new PrintWriter(socket.getOutputStream(), true);
+        ) {
+            while (true) {
+                output.println(NumberGenerator.generate());
+            }
+        }
+    }
+
     private void runAsUser() throws IOException {
         System.out.println("Connecting...");
         try (
-                var socket = new Socket("localhost", App.PORT);
-                var output = new PrintWriter(socket.getOutputStream(), true);
-                var stdIn = new BufferedReader(new InputStreamReader(System.in));
+            var socket = new Socket("localhost", App.PORT);
+            var output = new PrintWriter(socket.getOutputStream(), true);
+            var stdIn = new BufferedReader(new InputStreamReader(System.in));
         ) {
             System.out.println("Connected");
             var userInput = stdIn.readLine();

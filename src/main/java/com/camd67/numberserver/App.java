@@ -61,7 +61,7 @@ public class App {
      */
     private void startReporter() {
         reporterService.scheduleAtFixedRate(
-            new Reporter(),
+            new Reporter(numberAggregator::generateReport),
             0,
             10,
             TimeUnit.SECONDS

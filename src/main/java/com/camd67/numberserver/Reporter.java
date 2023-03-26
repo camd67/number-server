@@ -1,19 +1,31 @@
 package com.camd67.numberserver;
 
-public class Reporter implements Runnable {
-    private final long startTime;
-    private long lastTime;
+import java.util.function.Supplier;
 
-    public Reporter() {
-        startTime = System.currentTimeMillis();
-        lastTime = startTime;
+/**
+ * Reports out the current state of the application.
+ * Data is output based on the supplied report generator.
+ */
+public class Reporter implements Runnable {
+    private final Supplier<NumberAggregator.Report> generateReport;
+    private NumberAggregator.Report lastReport;
+
+    public Reporter(Supplier<NumberAggregator.Report> generateReport) {
+        this.generateReport = generateReport;
+        lastReport = new NumberAggregator.Report(0, 0);
     }
 
     @Override
     public void run() {
-        var currentTime = System.currentTimeMillis();
-        System.out.println("[REPORT] Running for " + ((currentTime - startTime) / 1000.0) + "s");
-        System.out.println("[REPORT] Last message sent " + ((currentTime - lastTime) / 1000.0) + "s ago");
-        lastTime = System.currentTimeMillis();
+        var report = generateReport.get();
+
+        var uniqueDiff = report.uniqueTotal - lastReport.uniqueTotal;
+        var dupeDiff = report.duplicatesSeen - lastReport.duplicatesSeen;
+        System.out.println(
+            "Received " + String.format("%,d", uniqueDiff) + " unique numbers, "
+                + String.format("%,d", dupeDiff) + " duplicates. " +
+                "Unique total: " + String.format("%,d", report.uniqueTotal)
+        );
+        lastReport = report;
     }
 }

@@ -23,4 +23,7 @@ if [[ ${1:-''} == '-d' ]]; then
   DEBUG_ARGS='-agentlib:jdwp=transport=dt_socket,server=y,address=5005,suspend=n'
 fi
 
-java $DEBUG_ARGS -jar target/number-server.jar "$@"
+# We need to increase the heap size since we're gonna deal with large amounts of memory.
+JAVA_ARGS="-Xmx5g"
+
+java $DEBUG_ARGS $JAVA_ARGS -jar target/number-server.jar "$@"
