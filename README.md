@@ -21,7 +21,17 @@ All building is done via maven and is auto-compiled on every run. If you'd prefe
 variable `SKIP_COMPILE` to any non-blank value.
 
 ### Via tests
-TBD
+Tests are not yet implemented.
+
+## Missing Implementations
+- [ ] Tests, especially those covering:
+  - [ ] multi-threading
+  - [ ] client-server communication
+  - [ ] Large data sets
+- [ ] Support for large data sets reaching the max 1,000,000,000 entries
+  - [ ] Technically the current solution can support that, given our JVM sizing, but perforamnce tanks
+        around the 100 million entries mark.This could possibly be solved by splitting our set into multiple
+        "prefixed-buckets" where each set is only responsible for numbers starting with `000`, `001`, `002`, etc.
 
 ## Assumptions
 - The default backlog implementation of the `ServerSocket` class is sufficient for backlogged clients
@@ -31,7 +41,7 @@ TBD
     have an available permit.
 - It's okay the client is not the most robust. It functions but there are a fair number of improvements around error
   handling.
-- We have at least 5gb of free memory to work with (in the worst case).
+- We have at least 5gb of free memory to work with.
   - If we don't have that available for whatever reason, there are ways we can offload the duplicate detection
   - This also means we are running on a 64bit machine
 
